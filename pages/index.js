@@ -1,6 +1,4 @@
-import Link from 'next/link'
 import Router from 'next/router'
-import { Button } from 'antd'
 
 const events = [
   'routeChangeStart',
@@ -34,12 +32,5 @@ export default () => {
     )
   }
 
-  return (
-    <>
-      <Link href="/a?id=1" as="/a/1">
-        <Button>Index</Button>
-      </Link>
-      <Button onClick={gotoTestB}>test b</Button>
-    </>
-  )
+  return <h1>Index</h1>
 }
