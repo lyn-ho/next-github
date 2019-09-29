@@ -4,11 +4,11 @@ import 'antd/dist/antd.css'
 import Layout from '../components/Layout'
 
 class MyApp extends App {
-  static async getInitialProps({ Component }) {
+  static async getInitialProps({ Component, ctx }) {
     let pageProps
 
     if (Component.getInitialProps) {
-      pageProps = await Component.getInitialProps()
+      pageProps = await Component.getInitialProps(ctx)
     }
 
     return { pageProps }

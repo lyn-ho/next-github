@@ -10,10 +10,8 @@ class MyDocument extends Document {
   render() {
     return (
       <Html>
-        <Head>
-          <style>{`.test {color:red;}`}</style>
-        </Head>
-        <body className="test">
+        <Head></Head>
+        <body>
           <Main />
           <NextScript />
         </body>
