@@ -4,6 +4,7 @@ import React, {
   useReducer,
   useLayoutEffect,
   useContext,
+  useRef,
 } from 'react'
 
 import MyContext from '../../lib/my-context'
@@ -41,20 +42,28 @@ function MyCountFunc() {
   useEffect(() => {
     console.log('effect invoked')
 
+    console.log(inputRef)
+
     return () => console.log('effect detached')
   }, [count]) // [], [name, count]  dependencies
 
-  useLayoutEffect(() => {
-    console.log('layout effect invoked')
+  // useLayoutEffect(() => {
+  //   console.log('layout effect invoked')
 
-    return () => console.log('layout effect detached')
-  }, [count]) // [], [name, count]  dependencies
+  //   return () => console.log('layout effect detached')
+  // }, [count]) // [], [name, count]  dependencies
 
   const context = useContext(MyContext)
 
+  const inputRef = useRef()
+
   return (
     <div>
-      <input value={name} onChange={(e) => setName(e.target.value)} />
+      <input
+        ref={inputRef}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
       <button onClick={() => dispatchCount({ type: 'add' })}>{count}</button>
       <p>{context}</p>
     </div>
