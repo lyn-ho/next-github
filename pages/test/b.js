@@ -1,4 +1,12 @@
-import React, { useState, useEffect, useReducer, useLayoutEffect } from 'react'
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useLayoutEffect,
+  useContext,
+} from 'react'
+
+import MyContext from '../../lib/my-context'
 
 function countReducer(state, action) {
   switch (action.type) {
@@ -42,10 +50,13 @@ function MyCountFunc() {
     return () => console.log('layout effect detached')
   }, [count]) // [], [name, count]  dependencies
 
+  const context = useContext(MyContext)
+
   return (
     <div>
       <input value={name} onChange={(e) => setName(e.target.value)} />
       <button onClick={() => dispatchCount({ type: 'add' })}>{count}</button>
+      <p>{context}</p>
     </div>
   )
 }
