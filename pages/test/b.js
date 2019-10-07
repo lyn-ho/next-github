@@ -5,6 +5,9 @@ import React, {
   useLayoutEffect,
   useContext,
   useRef,
+  memo,
+  useMemo,
+  useCallback,
 } from 'react'
 
 import MyContext from '../../lib/my-context'
@@ -21,53 +24,43 @@ function countReducer(state, action) {
 }
 
 function MyCountFunc() {
-  // const [count, setCount] = useState(0)
-
   const [count, dispatchCount] = useReducer(countReducer, 0)
   const [name, setName] = useState('lyn')
 
-  // setCount(1)
-  // setCount(count + 1)  // 闭包陷阱，
-  // setCount((c) => c + 1)
+  const config = useMemo(
+    () => ({
+      text: `count is ${count}`,
+      color: count > 3 ? 'red' : 'blue',
+    }),
+    [count]
+  )
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     // setCount((c) => c + 1)
-  //     dispatchCount({ type: 'add' })
-  //   }, 1000)
+  const handleButtonClick = useCallback(
+    () => dispatchCount({ type: 'add' }),
+    []
+  )
 
-  //   return () => clearInterval(interval)
-  // }, [])
-
-  useEffect(() => {
-    console.log('effect invoked')
-
-    console.log(inputRef)
-
-    return () => console.log('effect detached')
-  }, [count]) // [], [name, count]  dependencies
-
-  // useLayoutEffect(() => {
-  //   console.log('layout effect invoked')
-
-  //   return () => console.log('layout effect detached')
-  // }, [count]) // [], [name, count]  dependencies
-
-  const context = useContext(MyContext)
-
-  const inputRef = useRef()
+  // const handleButtonClick = useMemo(
+  //   () => () => dispatchCount({ type: 'add' }),
+  //   []
+  // )
 
   return (
     <div>
-      <input
-        ref={inputRef}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={() => dispatchCount({ type: 'add' })}>{count}</button>
-      <p>{context}</p>
+      <input value={name} onChange={(e) => setName(e.target.value)} />
+      <Child config={config} onButtonClick={handleButtonClick}></Child>
     </div>
   )
 }
+
+const Child = memo(function Child({ onButtonClick, config }) {
+  console.log('child render')
+
+  return (
+    <button onClick={onButtonClick} style={{ color: config.color }}>
+      {config.text}
+    </button>
+  )
+})
 
 export default MyCountFunc
