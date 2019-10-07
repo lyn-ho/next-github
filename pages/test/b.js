@@ -27,6 +27,9 @@ function MyCountFunc() {
   const [count, dispatchCount] = useReducer(countReducer, 0)
   const [name, setName] = useState('lyn')
 
+  const countRef = useRef()
+  countRef.current = count
+
   const config = useMemo(
     () => ({
       text: `count is ${count}`,
@@ -45,10 +48,18 @@ function MyCountFunc() {
   //   []
   // )
 
+  const handleAlertButtonClick = () => {
+    setTimeout(() => {
+      // alert(count)
+      alert(countRef.current)
+    }, 2000)
+  }
+
   return (
     <div>
       <input value={name} onChange={(e) => setName(e.target.value)} />
       <Child config={config} onButtonClick={handleButtonClick}></Child>
+      <button onClick={handleAlertButtonClick}>alert count</button>
     </div>
   )
 }
