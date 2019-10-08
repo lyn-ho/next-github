@@ -2,10 +2,15 @@ const Koa = require('koa')
 const Router = require('koa-router')
 const next = require('next')
 const session = require('koa-session')
+const Redis = require('ioredis')
+
+const RedisSessionStore = require('./server/session-store')
 
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
+
+const redis = new Redis()
 
 app.prepare().then(() => {
   const server = new Koa()
@@ -14,7 +19,8 @@ app.prepare().then(() => {
   server.keys = ['Lyn develop Github App']
   const SESSION_CONFIG = {
     key: 'jid',
-    // store: {}
+    // maxAge: 60 * 1000,
+    store: new RedisSessionStore(redis),
   }
 
   server.use(session(SESSION_CONFIG, server))
@@ -59,6 +65,11 @@ app.prepare().then(() => {
       age: 18,
     }
     ctx.body = 'set session success'
+  })
+
+  router.get('/delete/user', async (ctx) => {
+    ctx.session = null
+    ctx.body = 'delete session success'
   })
 
   server.use(router.routes())
