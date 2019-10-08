@@ -34,6 +34,7 @@
     "@commitlint/config-conventional": "^8.2.0",
     "babel-plugin-import": "^1.12.2",
     "commitizen": "^4.0.3",
-    "cz-conventional-changelog": "^3.0.2"
+    "cz-conventional-changelog": "^3.0.2",
+    "redux-devtools-extension": "^2.13.8"
   }
 }
