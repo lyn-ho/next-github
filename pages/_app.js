@@ -6,6 +6,8 @@ import MyContext from '../lib/my-context'
 import Layout from '../components/Layout'
 import store from '../store'
 
+import testHoc from '../lib/test-hoc'
+
 class MyApp extends App {
   state = {
     context: 'value',
@@ -38,4 +40,4 @@ class MyApp extends App {
   }
 }
 
-export default MyApp
+export default testHoc(MyApp)
