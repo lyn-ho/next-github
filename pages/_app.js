@@ -1,8 +1,10 @@
 import App, { Container } from 'next/app'
 import 'antd/dist/antd.css'
+import { Provider } from 'react-redux'
 
 import MyContext from '../lib/my-context'
 import Layout from '../components/Layout'
+import store from '../store'
 
 class MyApp extends App {
   state = {
@@ -25,16 +27,11 @@ class MyApp extends App {
     return (
       <Container>
         <Layout>
-          <MyContext.Provider value={this.state.context}>
-            <Component {...pageProps} />
-            <button
-              onClick={() =>
-                this.setState({ context: `${this.state.context}111` })
-              }
-            >
-              update context
-            </button>
-          </MyContext.Provider>
+          <Provider store={store}>
+            <MyContext.Provider value={this.state.context}>
+              <Component {...pageProps} />
+            </MyContext.Provider>
+          </Provider>
         </Layout>
       </Container>
     )
