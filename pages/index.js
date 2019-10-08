@@ -1,5 +1,7 @@
 import Router from 'next/router'
 
+import store from './store'
+
 const events = [
   'routeChangeStart',
   'routeChangeComplete',
