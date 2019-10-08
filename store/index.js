@@ -44,17 +44,8 @@ const allReducers = combineReducers({
   user: userReducer,
 })
 
-const store = createStore(
-  allReducers,
-  {
-    counter: initialState,
-    user: userInitialState,
-  },
-  composeWithDevTools(applyMiddleware(ReduxThunk))
-)
-
 // action creator
-function add(num) {
+export function add(num) {
   return { type: ADD, num }
 }
 
@@ -66,16 +57,31 @@ function addAsync(num) {
   }
 }
 
-// console.log(store.getState())
-store.dispatch(add(2))
-// console.log(store.getState())
+// // console.log(store.getState())
+// store.dispatch(add(2))
+// // console.log(store.getState())
 
-store.subscribe(() => {
-  console.log('subscribe ----- ', store.getState())
-})
+// store.subscribe(() => {
+//   console.log('subscribe ----- ', store.getState())
+// })
 
-// store.dispatch({ type: ADD })
-store.dispatch(addAsync(5))
-store.dispatch({ type: UPDATE_USERNAME, name: 'test' })
+// // store.dispatch({ type: ADD })
+// store.dispatch(addAsync(5))
+// store.dispatch({ type: UPDATE_USERNAME, name: 'test' })
 
-export default store
+export default function initializeStore(state) {
+  const store = createStore(
+    allReducers,
+    Object.assign(
+      {},
+      {
+        counter: initialState,
+        user: userInitialState,
+      },
+      state
+    ),
+    composeWithDevTools(applyMiddleware(ReduxThunk))
+  )
+
+  return store
+}

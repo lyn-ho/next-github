@@ -2,6 +2,8 @@ import Router from 'next/router'
 
 import { connect } from 'react-redux'
 
+import { add } from '../store'
+
 const events = [
   'routeChangeStart',
   'routeChangeComplete',
@@ -30,6 +32,11 @@ const Index = ({ counter, username, add, rename }) => {
       <button onClick={() => add(counter)}>do add</button>
     </>
   )
+}
+
+Index.getInitialProps = async ({ reduxStore }) => {
+  reduxStore.dispatch(add(3))
+  return {}
 }
 
 export default connect(
