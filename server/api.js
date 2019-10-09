@@ -2,6 +2,7 @@ const { requestGithub } = require('../lib/api')
 
 module.exports = (server) => {
   server.use(async (ctx, next) => {
+    console.log(ctx.request.body)
     const { path, method } = ctx
 
     if (path.startsWith('/github')) {
@@ -17,7 +18,7 @@ module.exports = (server) => {
       const result = await requestGithub(
         method,
         ctx.url.replace('/github/', '/'),
-        {},
+        ctx.request.body || {},
         headers
       )
 
