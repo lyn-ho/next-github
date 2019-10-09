@@ -1,1 +1,1 @@
-export default () => <h1>Index</h1>
+export default () => <span>Index</span>
