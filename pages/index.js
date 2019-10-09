@@ -3,6 +3,7 @@ import { Button, Icon, Tabs } from 'antd'
 import getConfig from 'next/config'
 import { connect } from 'react-redux'
 import Router, { withRouter } from 'next/router'
+import LRU from 'lru-cache'
 
 import Repo from '../components/Repo'
 
@@ -11,6 +12,11 @@ const api = require('../lib/api')
 const { publicRuntimeConfig } = getConfig()
 
 const isServer = typeof window === 'undefined'
+
+// 使用数据后会重新计时
+const cache = new LRU({
+  maxAge: 1000 * 60 * 10,
+})
 
 let cachedUserRepos
 let cachedUserStaredRepos
@@ -24,10 +30,19 @@ function Index({ userRepos, userStaredRepos, user, router }) {
 
   useEffect(() => {
     if (!isServer) {
+      // userRepos && cache.set('userRepos', userRepos)
+      // userStaredRepos && cache.set('userStaredRepos', userStaredRepos)
+
       cachedUserRepos = userRepos
       cachedUserStaredRepos = userStaredRepos
+
+      // 每间隔 n 时间更新
+      const timeout = setTimeout(() => {
+        cachedUserRepos = null
+        cachedUserStaredRepos = null
+      }, 1000 * 60 * 10)
     }
-  }, [])
+  }, [userRepos, userStaredRepos])
 
   if (!user || !user.id) {
     return (
@@ -128,6 +143,13 @@ Index.getInitialProps = async ({ ctx, reduxStore }) => {
   }
 
   if (!isServer) {
+    // if (cache.get('userRepos') && cache.get('userStaredRepos')) {
+    //   return {
+    //     userRepos: cache.get('userRepos'),
+    //     userStaredRepos: cache.get('userStaredRepos'),
+    //   }
+    // }
+
     if (cachedUserRepos && cachedUserStaredRepos) {
       return {
         userRepos: cachedUserRepos,
