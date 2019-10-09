@@ -2,7 +2,6 @@ import App, { Container } from 'next/app'
 import 'antd/dist/antd.css'
 import { Provider } from 'react-redux'
 
-import MyContext from '../lib/my-context'
 import Layout from '../components/Layout'
 
 import withRedux from '../lib/with-redux'
@@ -30,13 +29,11 @@ class MyApp extends App {
 
     return (
       <Container>
-        <Layout>
-          <Provider store={reduxStore}>
-            <MyContext.Provider value={this.state.context}>
-              <Component {...pageProps} />
-            </MyContext.Provider>
-          </Provider>
-        </Layout>
+        <Provider store={reduxStore}>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </Provider>
       </Container>
     )
   }
