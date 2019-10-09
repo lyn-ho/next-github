@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Button, Icon, Tabs } from 'antd'
 import getConfig from 'next/config'
 import { connect } from 'react-redux'
@@ -5,8 +6,14 @@ import Router, { withRouter } from 'next/router'
 
 import Repo from '../components/Repo'
 
-const { publicRuntimeConfig } = getConfig()
 const api = require('../lib/api')
+
+const { publicRuntimeConfig } = getConfig()
+
+const isServer = typeof window === 'undefined'
+
+let cachedUserRepos
+let cachedUserStaredRepos
 
 function Index({ userRepos, userStaredRepos, user, router }) {
   const tabKey = router.query.key || '1'
@@ -14,6 +21,13 @@ function Index({ userRepos, userStaredRepos, user, router }) {
   const handleTabChange = (activeKey) => {
     Router.push(`/?key=${activeKey}`)
   }
+
+  useEffect(() => {
+    if (!isServer) {
+      cachedUserRepos = userRepos
+      cachedUserStaredRepos = userStaredRepos
+    }
+  }, [])
 
   if (!user || !user.id) {
     return (
@@ -110,8 +124,15 @@ Index.getInitialProps = async ({ ctx, reduxStore }) => {
   const user = reduxStore.getState().user
 
   if (!user || !user.id) {
-    return {
-      isLogin: false,
+    return {}
+  }
+
+  if (!isServer) {
+    if (cachedUserRepos && cachedUserStaredRepos) {
+      return {
+        userRepos: cachedUserRepos,
+        userStaredRepos: cachedUserStaredRepos,
+      }
     }
   }
 
@@ -130,14 +151,15 @@ Index.getInitialProps = async ({ ctx, reduxStore }) => {
   )
 
   return {
-    isLogin: true,
     userRepos: repos.data,
     userStaredRepos: staredRepos.data,
   }
 }
 
-export default connect(function mapState(state) {
-  return {
-    user: state.user,
-  }
-})(withRouter(Index))
+export default withRouter(
+  connect(function mapState(state) {
+    return {
+      user: state.user,
+    }
+  })(Index)
+)
