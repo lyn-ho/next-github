@@ -2,6 +2,8 @@ import { Button, Icon } from 'antd'
 import getConfig from 'next/config'
 import { connect } from 'react-redux'
 
+import Repo from '../components/Repo'
+
 const { publicRuntimeConfig } = getConfig()
 const api = require('../lib/api')
 
@@ -39,7 +41,9 @@ function Index({ userRepos, userStaredRepos, user }) {
         </p>
       </div>
       <div className="user-repos">
-        <p>User Repos</p>
+        {userRepos.map((repo) => (
+          <Repo key={repo.id} repo={repo} />
+        ))}
       </div>
 
       <style jsx>{`
@@ -77,6 +81,10 @@ function Index({ userRepos, userStaredRepos, user }) {
           width: 100%;
           border-radius: 5px;
         }
+
+        .user-repos {
+          flex-grow: 1;
+        }
       `}</style>
     </div>
   )
@@ -91,7 +99,13 @@ Index.getInitialProps = async ({ ctx, reduxStore }) => {
     }
   }
 
-  const repos = await api.request({ url: '/user/repos' }, ctx.req, ctx.res)
+  const repos = await api.request(
+    {
+      url: '/user/repos?type=all',
+    },
+    ctx.req,
+    ctx.res
+  )
 
   const staredRepos = await api.request(
     { url: '/user/starred' },
