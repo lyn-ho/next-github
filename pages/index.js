@@ -1,13 +1,20 @@
-import { Button, Icon } from 'antd'
+import { Button, Icon, Tabs } from 'antd'
 import getConfig from 'next/config'
 import { connect } from 'react-redux'
+import Router, { withRouter } from 'next/router'
 
 import Repo from '../components/Repo'
 
 const { publicRuntimeConfig } = getConfig()
 const api = require('../lib/api')
 
-function Index({ userRepos, userStaredRepos, user }) {
+function Index({ userRepos, userStaredRepos, user, router }) {
+  const tabKey = router.query.key || '1'
+
+  const handleTabChange = (activeKey) => {
+    Router.push(`/?key=${activeKey}`)
+  }
+
   if (!user || !user.id) {
     return (
       <div className="root">
@@ -41,9 +48,18 @@ function Index({ userRepos, userStaredRepos, user }) {
         </p>
       </div>
       <div className="user-repos">
-        {userRepos.map((repo) => (
-          <Repo key={repo.id} repo={repo} />
-        ))}
+        <Tabs activeKey={tabKey} onChange={handleTabChange} animated={false}>
+          <Tabs.TabPane tab="你的仓库" key="1">
+            {userRepos.map((repo) => (
+              <Repo key={repo.id} repo={repo} />
+            ))}
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="你关注的仓库" key="2">
+            {userStaredRepos.map((repo) => (
+              <Repo key={repo.id} repo={repo} />
+            ))}
+          </Tabs.TabPane>
+        </Tabs>
       </div>
 
       <style jsx>{`
@@ -101,7 +117,7 @@ Index.getInitialProps = async ({ ctx, reduxStore }) => {
 
   const repos = await api.request(
     {
-      url: '/user/repos?type=all',
+      url: '/user/repos',
     },
     ctx.req,
     ctx.res
@@ -124,4 +140,4 @@ export default connect(function mapState(state) {
   return {
     user: state.user,
   }
-})(Index)
+})(withRouter(Index))
