@@ -15,6 +15,8 @@ import { connect } from 'react-redux'
 
 import Container from './Container'
 
+import { logout } from '../store'
+
 const { publicRuntimeConfig } = getConfig()
 
 const { Header, Content, Footer } = Layout
@@ -35,7 +37,7 @@ const Comp = ({ color, children, style }) => (
   <div style={{ color, ...style }}>{children}</div>
 )
 
-function MyLayout({ children, user }) {
+function MyLayout({ children, user, logout }) {
   const [search, setSearch] = useState('')
 
   const handleSearchChange = useCallback(
@@ -47,10 +49,16 @@ function MyLayout({ children, user }) {
 
   const handleOnSearch = useCallback(() => {}, [])
 
+  const handleLogout = useCallback(() => {
+    logout()
+  }, [])
+
   const userDropdown = (
     <Menu>
       <Menu.Item>
-        <a href="#">登出</a>
+        <a href="#" onClick={handleLogout}>
+          登 出
+        </a>
       </Menu.Item>
     </Menu>
   )
@@ -133,8 +141,15 @@ function MyLayout({ children, user }) {
   )
 }
 
-export default connect(function mapState(state) {
-  return {
-    user: state.user,
+export default connect(
+  function mapState(state) {
+    return {
+      user: state.user,
+    }
+  },
+  function mapReducer(dispatch) {
+    return {
+      logout: () => dispatch(logout()),
+    }
   }
-})(MyLayout)
+)(MyLayout)
