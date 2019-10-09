@@ -1,29 +1,34 @@
-import { useEffect } from 'react'
-import axios from 'axios'
-
 const api = require('../lib/api')
 
-function Index() {
-  useEffect(() => {
-    axios.post('/github/test', { test: 123 })
-  }, [])
-
+function Index({ userRepos, userStaredRepos, isLogin }) {
+  console.log('is login ', isLogin)
+  console.log(userRepos)
+  console.log(userStaredRepos)
   return <span>Index</span>
 }
 
-Index.getInitialProps = async ({ ctx }) => {
-  // const result = await axios.get('/github/search/repositories?q=react')
-  // const result = await axios.get('http://localhost:30000/github/search/repositories?q=react')
+Index.getInitialProps = async ({ ctx, reduxStore }) => {
+  const user = reduxStore.getState().user
 
-  const result = await api.request(
-    { url: '/search/repositories?q=react' },
+  if (!user || !user.id) {
+    return {
+      isLogin: false,
+    }
+  }
+
+  const repos = await api.request({ url: '/user/repos' }, ctx.req, ctx.res)
+
+  const staredRepos = await api.request(
+    { url: '/user/starred' },
     ctx.req,
     ctx.res
   )
 
-  // console.log(result.data)
-
-  return { data: result.data }
+  return {
+    isLogin: true,
+    userRepos: repos.data,
+    userStaredRepos: staredRepos.data,
+  }
 }
 
 export default Index
