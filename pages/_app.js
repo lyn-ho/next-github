@@ -3,7 +3,6 @@ import 'antd/dist/antd.css'
 import { Provider } from 'react-redux'
 import Router from 'next/router'
 import Link from 'next/link'
-import axios from 'axios'
 
 import Layout from '../components/Layout'
 import PageLoading from '../components/PageLoading'
@@ -32,12 +31,6 @@ class MyApp extends App {
     Router.events.on('routeChangeStart', this.startLoading)
     Router.events.on('routeChangeComplete', this.stopLoading)
     Router.events.on('routeChangeError', this.stopLoading)
-
-    axios
-      .get('/github/search/repositories?q=react')
-      .then((resp) => {
-        console.log(resp)
-      })
   }
 
   componentWillUnmount() {
