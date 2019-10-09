@@ -12,6 +12,8 @@ import {
 } from 'antd'
 import getConfig from 'next/config'
 import { connect } from 'react-redux'
+import { withRouter } from 'next/router'
+import axios from 'axios'
 
 import Container from './Container'
 
@@ -37,7 +39,7 @@ const Comp = ({ color, children, style }) => (
   <div style={{ color, ...style }}>{children}</div>
 )
 
-function MyLayout({ children, user, logout }) {
+function MyLayout({ children, user, logout, router }) {
   const [search, setSearch] = useState('')
 
   const handleSearchChange = useCallback(
@@ -51,12 +53,28 @@ function MyLayout({ children, user, logout }) {
 
   const handleLogout = useCallback(() => {
     logout()
+  }, [logout])
+
+  const handleGoToOAuth = useCallback((e) => {
+    e.preventDefault()
+    axios
+      .get(`/prepare-auth?url=${router.asPath}`)
+      .then((resp) => {
+        if (resp.status === 200) {
+          location.href = publicRuntimeConfig.OAUTH_URL
+        } else {
+          console.log('prepare auth failed ', resp)
+        }
+      })
+      .catch((err) => {
+        console.log('prepare auth failed ', err)
+      })
   }, [])
 
   const userDropdown = (
     <Menu>
       <Menu.Item>
-        <a href="#" onClick={handleLogout}>
+        <a href="" onClick={handleLogout}>
           登 出
         </a>
       </Menu.Item>
@@ -84,13 +102,13 @@ function MyLayout({ children, user, logout }) {
             <div className="user">
               {user && user.id ? (
                 <Dropdown overlay={userDropdown}>
-                  <a href="/">
+                  <a href="#" onClick={(e) => e.preventDefault()}>
                     <Avatar size={40} src={user.avatar_url} />
                   </a>
                 </Dropdown>
               ) : (
                 <Tooltip title="点击进行登录">
-                  <a href={publicRuntimeConfig.OAUTH_URL}>
+                  <a href={`/prepare-auth?url=${router.asPath}`}>
                     <Avatar size={40} icon="user" />
                   </a>
                 </Tooltip>
@@ -152,4 +170,4 @@ export default connect(
       logout: () => dispatch(logout()),
     }
   }
-)(MyLayout)
+)(withRouter(MyLayout))
