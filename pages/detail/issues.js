@@ -3,6 +3,7 @@ import { Avatar, Button } from 'antd'
 import dynamic from 'next/dynamic'
 
 import withRepoBasic from '../../components/with-repo-basic'
+import SearchUser from '../../components/SearchUser'
 
 import api from '../../lib/api'
 import { getLastUpdated } from '../../lib/util'
@@ -105,8 +106,16 @@ function IssueItem({ issue }) {
 
 function Issues({ issues }) {
   console.log(issues)
+
+  const [creator, setCreator] = useState()
+
+  const handleCreatorChange = useCallback((value) => {
+    setCreator(value)
+  })
+
   return (
     <div className="root">
+      <SearchUser onChange={handleCreatorChange} value={creator} />
       <div className="issues">
         {issues.map((issue) => (
           <IssueItem key={issue.id} issue={issue} />
