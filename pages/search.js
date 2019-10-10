@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { withRouter } from 'next/router'
 import Link from 'next/link'
 import Router from 'next/router'
@@ -41,37 +42,27 @@ const SORT_TYPES = [
 
 const selectedItemStyle = {
   borderLeft: '2px solid #e36209',
-  fontWeight: 700,
+  fontWeight: 200,
 }
+
+const FilterLink = memo(({ name, query, lang, sort, order }) => {
+  let queryString = `?query=${query}`
+  if (lang) queryString += `&lang=${lang}`
+  if (sort) queryString += `&sort=${sort}&order=${order || 'desc'}`
+  // if (page) queryString += `&page=${page}`
+
+  return (
+    <Link href={`/search${queryString}`}>
+      <a>{name}</a>
+    </Link>
+  )
+})
 
 function Search({ router, repos }) {
   console.log(repos)
 
-  const { query, sort, order, lang } = router.query
-
-  const handleLanguageChange = (language) => {
-    Router.push({
-      pathname: '/search',
-      query: {
-        query,
-        lang: language,
-        sort,
-        order,
-      },
-    })
-  }
-
-  const handleSortChange = (sort) => {
-    Router.push({
-      pathname: '/search',
-      query: {
-        query,
-        lang,
-        sort: sort.value,
-        order: sort.order,
-      },
-    })
-  }
+  const { ...queries } = router.query
+  const { lang, sort, order } = router.query
 
   return (
     <div className="root">
@@ -84,7 +75,11 @@ function Search({ router, repos }) {
             dataSource={LANGUAGES}
             renderItem={(item) => (
               <List.Item style={lang === item ? selectedItemStyle : null}>
-                <a onClick={() => handleLanguageChange(item)}>{item}</a>
+                {lang === item ? (
+                  <span>{item}</span>
+                ) : (
+                  <FilterLink {...queries} name={item} lang={item} />
+                )}
               </List.Item>
             )}
           />
@@ -103,21 +98,38 @@ function Search({ router, repos }) {
               }
               return (
                 <List.Item style={selected ? selectedItemStyle : null}>
-                  <a onClick={() => handleSortChange(item)}>{item.name}</a>
+                  {selected ? (
+                    <span>{item.name}</span>
+                  ) : (
+                    <FilterLink
+                      {...queries}
+                      name={item.name}
+                      sort={item.value || ''}
+                      order={item.order || ''}
+                    />
+                  )}
                 </List.Item>
               )
             }}
           />
         </Col>
       </Row>
+      <style jsx>{`
+        .root {
+          padding: 20px 0;
+        }
+
+        .list-header {
+          font-weight: 800;
+          font-size: 16px;
+        }
+      `}</style>
     </div>
   )
 }
 
 Search.getInitialProps = async ({ ctx }) => {
   const { query, sort, lang, order, page } = ctx.query
-
-  console.log(ctx.query)
 
   if (!query) {
     return {
