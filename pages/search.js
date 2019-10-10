@@ -1,5 +1,6 @@
 import { withRouter } from 'next/router'
 import Link from 'next/link'
+import Router from 'next/router'
 import { Row, Col, List } from 'antd'
 
 const api = require('../lib/api')
@@ -38,8 +39,40 @@ const SORT_TYPES = [
  * page: 分页
  */
 
+const selectedItemStyle = {
+  borderLeft: '2px solid #e36209',
+  fontWeight: 700,
+}
+
 function Search({ router, repos }) {
   console.log(repos)
+
+  const { query, sort, order, lang } = router.query
+
+  const handleLanguageChange = (language) => {
+    Router.push({
+      pathname: '/search',
+      query: {
+        query,
+        lang: language,
+        sort,
+        order,
+      },
+    })
+  }
+
+  const handleSortChange = (sort) => {
+    Router.push({
+      pathname: '/search',
+      query: {
+        query,
+        lang,
+        sort: sort.value,
+        order: sort.order,
+      },
+    })
+  }
+
   return (
     <div className="root">
       <Row gutter={20}>
@@ -50,10 +83,8 @@ function Search({ router, repos }) {
             style={{ marginBottom: 20 }}
             dataSource={LANGUAGES}
             renderItem={(item) => (
-              <List.Item>
-                <Link href="/search">
-                  <a>{item}</a>
-                </Link>
+              <List.Item style={lang === item ? selectedItemStyle : null}>
+                <a onClick={() => handleLanguageChange(item)}>{item}</a>
               </List.Item>
             )}
           />
@@ -62,13 +93,20 @@ function Search({ router, repos }) {
             header={<span className="list-header">排序</span>}
             style={{ marginBottom: 20 }}
             dataSource={SORT_TYPES}
-            renderItem={(item) => (
-              <List.Item>
-                <Link href="/search">
-                  <a>{item.name}</a>
-                </Link>
-              </List.Item>
-            )}
+            renderItem={(item) => {
+              let selected = false
+
+              if (item.name === 'Best Match' && !sort) {
+                selected = true
+              } else if (item.value === sort && item.order === order) {
+                selected = true
+              }
+              return (
+                <List.Item style={selected ? selectedItemStyle : null}>
+                  <a onClick={() => handleSortChange(item)}>{item.name}</a>
+                </List.Item>
+              )
+            }}
           />
         </Col>
       </Row>
@@ -79,7 +117,7 @@ function Search({ router, repos }) {
 Search.getInitialProps = async ({ ctx }) => {
   const { query, sort, lang, order, page } = ctx.query
 
-  console.log(ctx.q)
+  console.log(ctx.query)
 
   if (!query) {
     return {
@@ -103,7 +141,7 @@ Search.getInitialProps = async ({ ctx }) => {
   )
 
   return {
-    repos: result,
+    repos: result.data,
   }
 }
 
