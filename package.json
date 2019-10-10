@@ -6,7 +6,8 @@
     "dev": "node server.js",
     "build": "next build",
     "start": "next start",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build"
   },
   "config": {
     "commitizen": {
@@ -41,8 +42,10 @@
   "devDependencies": {
     "@commitlint/cli": "^8.2.0",
     "@commitlint/config-conventional": "^8.2.0",
+    "@zeit/next-bundle-analyzer": "^0.1.2",
     "babel-plugin-import": "^1.12.2",
     "commitizen": "^4.0.3",
+    "cross-env": "^6.0.3",
     "cz-conventional-changelog": "^3.0.2",
     "redux-devtools-extension": "^2.13.8"
   }
