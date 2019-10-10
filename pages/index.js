@@ -3,20 +3,15 @@ import { Button, Icon, Tabs } from 'antd'
 import getConfig from 'next/config'
 import { connect } from 'react-redux'
 import Router, { withRouter } from 'next/router'
-import LRU from 'lru-cache'
 
 import Repo from '../components/Repo'
+import { cacheArray } from '../lib/repo-basic-cache'
 
 const api = require('../lib/api')
 
 const { publicRuntimeConfig } = getConfig()
 
 const isServer = typeof window === 'undefined'
-
-// 使用数据后会重新计时
-const cache = new LRU({
-  maxAge: 1000 * 60 * 10,
-})
 
 let cachedUserRepos
 let cachedUserStaredRepos
@@ -41,6 +36,13 @@ function Index({ userRepos, userStaredRepos, user, router }) {
         cachedUserRepos = null
         cachedUserStaredRepos = null
       }, 1000 * 60 * 10)
+    }
+  }, [userRepos, userStaredRepos])
+
+  useEffect(() => {
+    if (!isServer) {
+      cacheArray(userRepos)
+      cacheArray(userStaredRepos)
     }
   }, [userRepos, userStaredRepos])
 
