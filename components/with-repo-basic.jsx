@@ -84,7 +84,6 @@ export default function(Comp, type = 'index') {
       pageData = await Comp.getInitialProps(context)
     }
 
-    console.log('get cache ---- ', full_name, ' ----- ', get(full_name))
     if (get(full_name)) {
       return {
         repoBasic: get(full_name),
