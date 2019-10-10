@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Avatar, Button } from 'antd'
+import { Avatar, Button, Select, Spin } from 'antd'
 import dynamic from 'next/dynamic'
 
 import withRepoBasic from '../../components/with-repo-basic'
@@ -104,29 +104,123 @@ function IssueItem({ issue }) {
   )
 }
 
-function Issues({ issues }) {
-  console.log(issues)
+function makeQuery(creator, state, labels) {
+  let creatorStr = creator ? `creator=${creator}` : ''
+  let stateStr = state ? `state=${state}` : ''
+  let labelStr = ''
+  if (labels && labels.length) {
+    labelStr = `labels=${labels.join(',')}`
+  }
 
+  const arr = []
+
+  creatorStr && arr.push(creatorStr)
+  stateStr && arr.push(stateStr)
+  labelStr && arr.push(labelStr)
+
+  return arr.length ? `?${arr.join('&')}` : ''
+}
+
+function Issues({ initialIssues, labels, owner, name }) {
   const [creator, setCreator] = useState()
+  const [state, setState] = useState()
+  const [label, setLabel] = useState([])
+  const [issues, setIssues] = useState(initialIssues)
+  const [fetching, setFetching] = useState(false)
 
   const handleCreatorChange = useCallback((value) => {
     setCreator(value)
   })
 
+  const handleStateChange = useCallback((value) => {
+    setState(value)
+  })
+
+  const handleLabelChange = useCallback((value) => {
+    setLabel(value)
+  })
+
+  const handleSearch = useCallback(() => {
+    setFetching(true)
+
+    api
+      .request({
+        url: `/repos/${owner}/${name}/issues${makeQuery(
+          creator,
+          state,
+          label
+        )}`,
+      })
+      .then((resp) => {
+        setIssues(resp.data)
+        setFetching(false)
+      })
+      .catch((err) => {
+        console.log(err)
+        setFetching(false)
+      })
+  }, [owner, name, creator, state, label])
+
   return (
     <div className="root">
-      <SearchUser onChange={handleCreatorChange} value={creator} />
-      <div className="issues">
-        {issues.map((issue) => (
-          <IssueItem key={issue.id} issue={issue} />
-        ))}
+      <div className="search">
+        <SearchUser onChange={handleCreatorChange} value={creator} />
+        <Select
+          placeholder="状态"
+          onChange={handleStateChange}
+          value={state}
+          style={{ width: 200, marginLeft: 20 }}
+        >
+          <Select.Option value="all">All</Select.Option>
+          <Select.Option value="open">Open</Select.Option>
+          <Select.Option value="closed">Closed</Select.Option>
+        </Select>
+        <Select
+          mode="multiple"
+          placeholder="Label"
+          onChange={handleLabelChange}
+          value={label}
+          style={{ flexGrow: 1, marginLeft: 20, marginRight: 20 }}
+        >
+          {labels.map((la) => (
+            <Select.Option value={la.name} key={la.id}>
+              {la.name}
+            </Select.Option>
+          ))}
+        </Select>
+        <Button type="primary" onClick={handleSearch} disabled={fetching}>
+          搜索
+        </Button>
       </div>
+      {fetching ? (
+        <div className="loading">
+          <Spin />
+        </div>
+      ) : (
+        <div className="issues">
+          {issues.map((issue) => (
+            <IssueItem key={issue.id} issue={issue} />
+          ))}
+        </div>
+      )}
+
       <style jsx>{`
         .issues {
           border: 1px solid #eee;
           border-radius: 5px;
           margin-top: 20px;
           margin-bottom: 20px;
+        }
+
+        .search {
+          display: flex;
+        }
+
+        .loading {
+          height: 400px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
       `}</style>
     </div>
@@ -140,16 +234,28 @@ Issues.getInitialProps = async ({
     query: { owner, name },
   },
 }) => {
-  const issuesResp = await api.request(
-    {
-      url: `/repos/${owner}/${name}/issues`,
-    },
-    req,
-    res
-  )
+  const fetches = await Promise.all([
+    await api.request(
+      {
+        url: `/repos/${owner}/${name}/issues`,
+      },
+      req,
+      res
+    ),
+    await api.request(
+      {
+        url: `/repos/${owner}/${name}/labels`,
+      },
+      req,
+      res
+    ),
+  ])
 
   return {
-    issues: issuesResp.data,
+    owner,
+    name,
+    initialIssues: fetches[0].data,
+    labels: fetches[1].data,
   }
 }
 
